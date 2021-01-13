@@ -3,7 +3,7 @@ import java.util.Arrays;
 
 class Scrabble {
 
-    static int score;
+    int score = 0;
 
     static final String[] TWO = {"d", "g"};
     static final String[] THREE = {"b", "c", "m", "p"};
@@ -13,31 +13,20 @@ class Scrabble {
     static final String[] TEN = {"q", "z"};
 
     Scrabble(String word) {
-        convertWordToScore(word);
+        tallyScoreFromWord(word);
     }
 
     Scrabble(String word, int doubleWordTokens, int tripleWordTokens) {
-        convertWordToScore(word);
+        tallyScoreFromWord(word);
         applyMultipleWordScore(doubleWordTokens, tripleWordTokens);
     }
 
     Scrabble(String word, int doubleWordTokens, int tripleWordTokens,
              int[] doubleLetterPositions, int[] tripleLetterPositions) throws InvalidParameterException {
         checkLetterSquaresDoNotMatch(doubleLetterPositions,tripleLetterPositions);
-        convertWordToScore(word, doubleLetterPositions, tripleLetterPositions);
+        tallyScoreFromWord(word, doubleLetterPositions, tripleLetterPositions);
+        applyMultipleWordScore(doubleWordTokens, tripleWordTokens);
 
-
-    }
-
-    private void checkLetterSquaresDoNotMatch(int[] doubleLetterPositions, int[] tripleLetterPositions) {
-
-        for (int position: doubleLetterPositions
-             ) {
-            if (contains(tripleLetterPositions, position)) {
-                throw new InvalidParameterException("Double Letter Square cannot be at same position as " +
-                        "Triple Letter Square");
-            }
-        }
     }
 
     int getScore() {
@@ -45,23 +34,24 @@ class Scrabble {
 
     }
 
-    private void convertWordToScore(String word) {
+    private void tallyScoreFromWord(String word) {
         score = word.toLowerCase().codePoints().
                 mapToObj(c -> String.valueOf((char) c)).
                 mapToInt(this::translateScore).sum();
     }
 
-    private void convertWordToScore(String word, int[] doubleLetterPositions, int[] tripleLetterPositions) {
-        int wordScore = 0;
+    private void tallyScoreFromWord(String word, int[] doubleLetterPositions, int[] tripleLetterPositions) {
 
         for (int i = 0; i < word.length(); i++) {
+
             int multiplier = 1;
+
             if (contains(doubleLetterPositions, i)) {
                 multiplier = 2;
             } else if (contains(tripleLetterPositions, i)) {
                 multiplier = 3;
             }
-            
+        score = score + (translateScore((String.valueOf(word.charAt(i)))) * multiplier);
 
         }
 
@@ -76,8 +66,6 @@ class Scrabble {
         if (Arrays.asList(EIGHT).contains(letter)) return 8;
         if (Arrays.asList(TEN).contains(letter)) return 10;
         return 1;
-
-
     }
 
     private void applyMultipleWordScore(int doubleWordTokens, int tripleWordTokens) {
@@ -85,6 +73,17 @@ class Scrabble {
             score = score * ((int) Math.pow(2, doubleWordTokens));
         if (tripleWordTokens > 0)
             score = score * ((int) Math.pow(3, tripleWordTokens));
+    }
+
+    private void checkLetterSquaresDoNotMatch(int[] doubleLetterPositions, int[] tripleLetterPositions) {
+
+        for (int position: doubleLetterPositions
+        ) {
+            if (contains(tripleLetterPositions, position)) {
+                throw new InvalidParameterException("Double Letter Square cannot be at same position as " +
+                        "Triple Letter Square");
+            }
+        }
     }
 
     public static boolean contains(final int[] array, final int v) {
