@@ -1,16 +1,30 @@
 import java.security.InvalidParameterException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 class Scrabble {
 
     int score = 0;
+    private static final Map<Integer, String[]> scoreMap;
 
-    static final String[] TWO = {"d", "g"};
-    static final String[] THREE = {"b", "c", "m", "p"};
-    static final String[] FOUR = {"f", "h", "v", "w", "y"};
-    static final String[] FIVE = {"k"};
-    static final String[] EIGHT = {"j", "x"};
-    static final String[] TEN = {"q", "z"};
+    static{
+        scoreMap = new HashMap<>();
+        String[] one = {"a", "e", "i", "o", "u", "l", "n", "r", "s", "t"};
+        String[] two = {"d", "g"};
+        String[] three = {"b", "c", "m", "p"};
+        String[] four = {"f", "h", "v", "w", "y"};
+        String[] five = {"k"};
+        String[] eight = {"j", "x"};
+        String[] ten = {"q", "z"};
+        scoreMap.put(1, one);
+        scoreMap.put(2, two);
+        scoreMap.put(3, three);
+        scoreMap.put(4, four);
+        scoreMap.put(5, five);
+        scoreMap.put(8, eight);
+        scoreMap.put(10, ten);
+    }
 
     Scrabble(String word) {
         tallyScoreFromWord(word);
@@ -57,17 +71,6 @@ class Scrabble {
 
     }
 
-    private int translateScore(String letter) {
-
-        if (Arrays.asList(TWO).contains(letter)) return 2;
-        if (Arrays.asList(THREE).contains(letter)) return 3;
-        if (Arrays.asList(FOUR).contains(letter)) return 4;
-        if (Arrays.asList(FIVE).contains(letter)) return 5;
-        if (Arrays.asList(EIGHT).contains(letter)) return 8;
-        if (Arrays.asList(TEN).contains(letter)) return 10;
-        return 1;
-    }
-
     private void applyMultipleWordScore(int doubleWordTokens, int tripleWordTokens) {
         if (doubleWordTokens > 0)
             score = score * ((int) Math.pow(2, doubleWordTokens));
@@ -86,12 +89,20 @@ class Scrabble {
         }
     }
 
+    private int translateScore(String letter) {
+
+        return scoreMap.entrySet().stream().
+                filter(e -> (Arrays.asList(e.getValue()).contains(letter))).
+                mapToInt(Map.Entry::getKey).max().getAsInt();
+
+    }
+
     public static boolean contains(final int[] array, final int v) {
 
         boolean result = false;
 
-        for(int i : array){
-            if(i == v){
+        for (int i : array) {
+            if (i == v) {
                 result = true;
                 break;
             }
